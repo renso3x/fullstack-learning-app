@@ -11,7 +11,7 @@ class UnauthorizedError extends Error {
 }
 
 export const authService = {
-  async register(name: string, email: string, password: string) {
+  async register(name: string, email: string, password: string, role?: string) {
     const existing = await UserModel.findOne({ email });
     if (existing) throw new BadRequestError('Email already registered');
 
@@ -21,7 +21,7 @@ export const authService = {
       name,
       email,
       passwordHash,
-      role: 'learner', // default
+      role: role || 'learner',
     });
 
     const token = signToken({

@@ -2,8 +2,8 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface ScanLogDocument extends Document {
-  userId: Types.ObjectId;
-  courseId: Types.ObjectId;
+  userId: Types.ObjectId | string;
+  courseId: Types.ObjectId | string;
   title: string;
   indication: string;
   dateOfScan: Date;

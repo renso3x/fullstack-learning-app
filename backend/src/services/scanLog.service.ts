@@ -1,18 +1,19 @@
 import { EnrollmentModel } from '../models/enrollment.model';
-import { ScanLogModel } from '../models/scanLog.model';
+import { ScanLogModel, ScanLogDocument } from '../models/scanLog.model';
 
 class BadRequestError extends Error {
   statusCode = 400;
 }
 
 export const scanLogService = {
-  async create(userId: string, data: any) {
+  async create(userId: string, data: any): Promise<ScanLogDocument> {
     const { courseId } = data;
 
     const enrolled = await EnrollmentModel.findOne({ userId, courseId });
     if (!enrolled) throw new BadRequestError('Not enrolled in this course');
 
-    return ScanLogModel.create({ ...data, userId });
+    const [scanLog] = await ScanLogModel.create([{ ...data, userId }]);
+    return scanLog;
   },
 
   async getMyScanLogs(userId: string) {
