@@ -6,5 +6,9 @@ import { enrollSchema } from '../validation/enrollment.schema';
 
 export const enrollmentRouter = Router();
 
-enrollmentRouter.post('/', auth('learner'), validate(enrollSchema), enrollmentController.enroll);
-enrollmentRouter.get('/me', auth('learner'), enrollmentController.getMine);
+enrollmentRouter.post('/', auth('learner','faculty', 'admin'), validate(enrollSchema), enrollmentController.enroll);
+enrollmentRouter.get(
+  '/me',
+  auth('learner', 'faculty', 'admin'),
+  enrollmentController.getMine
+);
