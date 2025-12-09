@@ -30,4 +30,22 @@ export const scanLogController = {
       next(err);
     }
   },
+
+  async listScanLogs(req: Request, res: Response) {
+    const { userId, courseId, startDate, endDate } = req.query;
+
+    const filter: any = {};
+
+    if (userId) filter.userId = userId;
+    if (courseId) filter.courseId = courseId;
+    if (startDate || endDate) {
+      filter.dateOfScan = {};
+      if (startDate) filter.dateOfScan.$gte = new Date(startDate as string);
+      if (endDate) filter.dateOfScan.$lte = new Date(endDate as string);
+    }
+
+    const logs = await scanLogService.listScanLogs(filter);
+
+    res.json(logs);
+  },
 };

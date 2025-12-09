@@ -33,4 +33,10 @@ export const scanLogService = {
 
     return ScanLogModel.find(filter).sort({ dateOfScan: -1 });
   },
+
+  async listScanLogs(filter: any) {
+    return await ScanLogModel.find(filter)
+      .populate('userId', 'name email')
+      .populate('courseId', 'title');
+  }
 };
