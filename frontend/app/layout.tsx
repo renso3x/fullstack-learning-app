@@ -1,9 +1,11 @@
 'use client';
 
-import './globals.css';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../lib/queryClient';
+import '../app/globals.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AuthProvider from '@/context/AuthProvider';
+import Navbar from '@/components/Navbar';
+
+const client = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -13,8 +15,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-50">
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>{children}</AuthProvider>
+        <QueryClientProvider client={client}>
+          <AuthProvider>
+            <Navbar />
+            <main>{children}</main>
+          </AuthProvider>
         </QueryClientProvider>
       </body>
     </html>
