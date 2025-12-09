@@ -29,3 +29,12 @@ export async function fetchAllScanLogs(filters: any = {}) {
   const res = await api.get('/scan-logs', { params: filters });
   return res.data;
 }
+
+export async function createCourse(payload: {
+  title: string;
+  description?: string;
+  modality: string;
+}) {
+  const res = await api.post('/courses', payload);
+  return res.data;
+}

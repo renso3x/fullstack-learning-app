@@ -1,19 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchCoursesAdmin, updateCourse } from '@/api/admin';
+import { fetchCoursesAdmin, updateCourse, createCourse } from '@/api/admin';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
 
 export default function CoursesAdminPage() {
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
 
+  // Fetch courses
   const { data: courses, isLoading } = useQuery({
     queryKey: ['admin-courses'],
     queryFn: fetchCoursesAdmin,
   });
 
-  const mutation = useMutation({
+  // Toggle active/inactive
+  const toggleMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       updateCourse(id, status),
     onSuccess: () => {
@@ -21,11 +25,43 @@ export default function CoursesAdminPage() {
     },
   });
 
+  // Create new course
+  const createMutation = useMutation({
+    mutationFn: createCourse,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-courses'] });
+      setOpen(false);
+    },
+  });
+
+  function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+
+    const title = (form.elements.namedItem('title') as HTMLInputElement).value;
+    const modality = (form.elements.namedItem('modality') as HTMLInputElement)
+      .value;
+    const description = (
+      form.elements.namedItem('description') as HTMLInputElement
+    ).value;
+
+    createMutation.mutate({ title, modality, description });
+  }
+
   return (
     <Protected>
       <RoleGuard roles={['faculty', 'admin']}>
         <div className="container py-8 space-y-6">
-          <h1 className="text-2xl font-semibold">Manage Courses</h1>
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-semibold">Manage Courses</h1>
+
+            {/* Create button visible ONLY to admin */}
+            <RoleGuard roles={['admin']}>
+              <button className="btn btn-primary" onClick={() => setOpen(true)}>
+                + Create Course
+              </button>
+            </RoleGuard>
+          </div>
 
           {isLoading && <p>Loading courses...</p>}
 
@@ -38,6 +74,11 @@ export default function CoursesAdminPage() {
                 <div>
                   <p className="font-semibold">{course.title}</p>
                   <p className="text-sm text-gray-500">{course.modality}</p>
+                  {course.description && (
+                    <p className="text-sm text-gray-400">
+                      {course.description}
+                    </p>
+                  )}
                 </div>
 
                 <button
@@ -47,7 +88,7 @@ export default function CoursesAdminPage() {
                       : 'bg-green-500 text-white'
                   }`}
                   onClick={() =>
-                    mutation.mutate({
+                    toggleMutation.mutate({
                       id: course._id,
                       status:
                         course.status === 'active' ? 'inactive' : 'active',
@@ -59,6 +100,55 @@ export default function CoursesAdminPage() {
               </li>
             ))}
           </ul>
+
+          {/* Modal */}
+          {open && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="bg-white p-6 rounded-lg shadow max-w-md w-full">
+                <h2 className="text-xl font-semibold mb-4">Create Course</h2>
+
+                <form className="space-y-4" onSubmit={handleCreate}>
+                  <input
+                    className="input"
+                    name="title"
+                    placeholder="Title"
+                    required
+                  />
+
+                  <input
+                    className="input"
+                    name="modality"
+                    placeholder="Modality"
+                    required
+                  />
+
+                  <textarea
+                    className="input"
+                    name="description"
+                    placeholder="Description"
+                  />
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setOpen(false)}
+                      className="btn btn-secondary"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={createMutation.isPending}
+                    >
+                      {createMutation.isPending ? 'Saving...' : 'Create'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       </RoleGuard>
     </Protected>
