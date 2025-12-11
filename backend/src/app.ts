@@ -9,13 +9,12 @@ export const app = express();
 app.use(cors());
 app.use(json());
 
-// Health check
+app.use(cors({ origin: '*', credentials: true }));
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-// API routes
 app.use('/api', apiRouter);
 
-// Error handler (last)
 app.use(errorHandler);
