@@ -5,16 +5,22 @@ import { useQuery } from '@tanstack/react-query';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
 import { fetchMyScanLogs } from '@/api/scanLogs';
+import ErrorMessage from '@/components/ErrorMessage';
+import Loading from '@/components/Loading';
 
 export default function ScanLogsListPage() {
   const params = useSearchParams();
   const courseId = params.get('course');
 
-  const { data: logs, isLoading } = useQuery({
+  const { data: logs, isLoading, error } = useQuery({
     queryKey: ['my-scan-logs', courseId],
     queryFn: () => fetchMyScanLogs(courseId || undefined),
   });
 
+
+  if (isLoading) return <Loading />;
+  if (error) return <ErrorMessage message="Failed to load data" />;
+  
   return (
     <Protected>
       <RoleGuard roles={['learner']}>

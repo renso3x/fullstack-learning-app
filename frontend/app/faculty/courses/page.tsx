@@ -5,13 +5,19 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCoursesAdmin, updateCourse, createCourse } from '@/api/admin';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
+import Loading from '@/components/Loading';
+import ErrorMessage from '@/components/ErrorMessage';
 
 export default function CoursesAdminPage() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
 
   // Fetch courses
-  const { data: courses, isLoading } = useQuery({
+  const {
+    data: courses,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['admin-courses'],
     queryFn: fetchCoursesAdmin,
   });
@@ -47,6 +53,9 @@ export default function CoursesAdminPage() {
 
     createMutation.mutate({ title, modality, description });
   }
+
+  if (isLoading) return <Loading />;
+  if (error) return <ErrorMessage message="Failed to load data" />;
 
   return (
     <Protected>

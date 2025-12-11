@@ -10,6 +10,8 @@ import {
 } from '@/api/admin';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
+import Loading from '@/components/Loading';
+import ErrorMessage from '@/components/ErrorMessage';
 
 export default function ScanLogsAdminPage() {
   const params = useSearchParams();
@@ -25,12 +27,12 @@ export default function ScanLogsAdminPage() {
   const [startDate, setStartDate] = useState(initialStart);
   const [endDate, setEndDate] = useState(initialEnd);
 
-  const { data: courses } = useQuery({
+  const { data: courses, isLoading: isLoadingCourses, error: errorCourses } = useQuery({
     queryKey: ['admin-courses'],
     queryFn: fetchCoursesAdmin,
   });
 
-  const { data: learners } = useQuery({
+  const { data: learners, isLoading: isLoadingLearners, error: errorLearners } = useQuery({
     queryKey: ['admin-learners'],
     queryFn: fetchLearners,
   });
@@ -64,6 +66,14 @@ export default function ScanLogsAdminPage() {
     setStartDate('');
     setEndDate('');
     router.push('/faculty/scan-logs');
+  }
+
+  if (isLoadingCourses || isLoadingLearners || isLoading) {
+    return <Loading />;
+  }
+
+  if (errorCourses || errorLearners) {
+    return <ErrorMessage message="Failed to load data" />;
   }
 
   return (
@@ -127,8 +137,6 @@ export default function ScanLogsAdminPage() {
               </button>
             </div>
           </div>
-
-          {isLoading && <p>Loading logs...</p>}
 
           <ul className="space-y-3">
             {logs?.map((log: any) => (

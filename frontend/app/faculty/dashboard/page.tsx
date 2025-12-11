@@ -4,12 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchMetrics } from '@/api/admin';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
+import Loading from '@/components/Loading';
+import ErrorMessage from '@/components/ErrorMessage';
 
 export default function FacultyDashboard() {
-  const { data: metrics, isLoading } = useQuery({
+  const { data: metrics, isLoading, error } = useQuery({
     queryKey: ['metrics'],
     queryFn: fetchMetrics,
   });
+
+
+  if (isLoading) return <Loading />;
+  if (error) return <ErrorMessage message="Failed to load data" />;
 
   return (
     <Protected>

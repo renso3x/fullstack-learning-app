@@ -4,12 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchLearners } from '@/api/admin';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
+import Loading from '@/components/Loading';
+import ErrorMessage from '@/components/ErrorMessage';
 
 export default function LearnersPage() {
-  const { data: learners, isLoading } = useQuery({
+  const { data: learners, isLoading, error } = useQuery({
     queryKey: ['learners'],
     queryFn: fetchLearners,
   });
+
+
+  if (isLoading) return <Loading />;
+  if (error) return <ErrorMessage message="Failed to load data" />;
 
   return (
     <Protected>

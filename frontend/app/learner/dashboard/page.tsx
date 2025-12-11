@@ -5,18 +5,28 @@ import { fetchCourses } from '@/api/courses';
 import { enroll, fetchMyEnrollments } from '@/api/enrollments';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
+import Loading from '@/components/Loading';
+import ErrorMessage from '@/components/ErrorMessage';
 
 export default function LearnerDashboard() {
   const queryClient = useQueryClient();
 
   // GET active courses
-  const { data: courses, isLoading: loadingCourses } = useQuery({
+  const {
+    data: courses,
+    isLoading: loadingCourses,
+    error: errorCourses,
+  } = useQuery({
     queryKey: ['courses'],
     queryFn: fetchCourses,
   });
 
   // GET enrolled courses
-  const { data: myEnrollments, isLoading: loadingEnrollments } = useQuery({
+  const {
+    data: myEnrollments,
+    isLoading: loadingEnrollments,
+    error: errorEnrollments,
+  } = useQuery({
     queryKey: ['my-enrollments'],
     queryFn: fetchMyEnrollments,
   });
@@ -28,6 +38,10 @@ export default function LearnerDashboard() {
       queryClient.invalidateQueries({ queryKey: ['my-enrollments'] });
     },
   });
+
+  if (loadingCourses || loadingEnrollments) return <Loading />;
+  if (errorCourses || errorEnrollments)
+    return <ErrorMessage message="Failed to load data" />;
 
   return (
     <Protected>
