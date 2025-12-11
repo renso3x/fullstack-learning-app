@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -13,7 +13,7 @@ import RoleGuard from '@/components/RoleGuard';
 import Loading from '@/components/Loading';
 import ErrorMessage from '@/components/ErrorMessage';
 
-export default function ScanLogsAdminPage() {
+function ScanLogsAdminPageContent() {
   const params = useSearchParams();
   const router = useRouter();
 
@@ -27,16 +27,26 @@ export default function ScanLogsAdminPage() {
   const [startDate, setStartDate] = useState(initialStart);
   const [endDate, setEndDate] = useState(initialEnd);
 
-  const { data: courses, isLoading: isLoadingCourses, error: errorCourses } = useQuery({
+  const {
+    data: courses,
+    isLoading: isLoadingCourses,
+    error: errorCourses,
+  } = useQuery({
     queryKey: ['admin-courses'],
     queryFn: fetchCoursesAdmin,
   });
 
-  const { data: learners, isLoading: isLoadingLearners, error: errorLearners } = useQuery({
+  // Load learners
+  const {
+    data: learners,
+    isLoading: isLoadingLearners,
+    error: errorLearners,
+  } = useQuery({
     queryKey: ['admin-learners'],
     queryFn: fetchLearners,
   });
 
+  // Load scan logs with filters
   const { data: logs, isLoading } = useQuery({
     queryKey: ['admin-scan-logs', userId, courseId, startDate, endDate],
     queryFn: () =>
@@ -49,15 +59,14 @@ export default function ScanLogsAdminPage() {
   });
 
   function applyFilters() {
-    const query: any = {};
+    const query: Record<string, string> = {};
 
     if (userId) query.userId = userId;
     if (courseId) query.courseId = courseId;
     if (startDate) query.startDate = startDate;
     if (endDate) query.endDate = endDate;
 
-    const qs = new URLSearchParams(query).toString();
-    router.push(`/faculty/scan-logs?${qs}`);
+    router.push(`/faculty/scan-logs?${new URLSearchParams(query).toString()}`);
   }
 
   function clearFilters() {
@@ -73,7 +82,7 @@ export default function ScanLogsAdminPage() {
   }
 
   if (errorCourses || errorLearners) {
-    return <ErrorMessage message="Failed to load data" />;
+    return <ErrorMessage message="Failed to load required data." />;
   }
 
   return (
@@ -82,6 +91,7 @@ export default function ScanLogsAdminPage() {
         <div className="container py-8 space-y-8">
           <h1 className="text-2xl font-semibold">Scan Logs</h1>
 
+          {/* FILTERS PANEL */}
           <div className="bg-white p-4 rounded shadow space-y-4">
             <h2 className="font-semibold">Filters</h2>
 
@@ -138,6 +148,7 @@ export default function ScanLogsAdminPage() {
             </div>
           </div>
 
+          {/* LOG LIST */}
           <ul className="space-y-3">
             {logs?.map((log: any) => (
               <li key={log._id} className="bg-white p-4 shadow rounded">
@@ -161,5 +172,13 @@ export default function ScanLogsAdminPage() {
         </div>
       </RoleGuard>
     </Protected>
+  );
+}
+
+export default function ScanLogsAdminPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ScanLogsAdminPageContent />
+    </Suspense>
   );
 }

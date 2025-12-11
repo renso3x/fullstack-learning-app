@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
 import { createScanLog } from '@/api/scanLogs';
+import Loading from '@/components/Loading';
 
-export default function NewScanLogPage() {
+function NewScanLogPageContent() {
   const params = useSearchParams();
   const router = useRouter();
   const courseId = params.get('course');
@@ -94,5 +95,13 @@ export default function NewScanLogPage() {
         </div>
       </RoleGuard>
     </Protected>
+  );
+}
+
+export default function NewScanLogPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <NewScanLogPageContent />
+    </Suspense>
   );
 }

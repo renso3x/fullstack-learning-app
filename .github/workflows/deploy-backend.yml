@@ -40,5 +40,5 @@ jobs:
           application_name: ${{ secrets.EB_APPLICATION_NAME }}
           environment_name: ${{ secrets.EB_ENVIRONMENT_NAME }}
           region: ${{ secrets.AWS_REGION }}
-          version_label: "build-${{ github.run_number }}"
+          version_label: "build-${{ github.run_id }}-${{ github.run_attempt }}"
           deployment_package: "backend/backend.zip"

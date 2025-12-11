@@ -7,8 +7,9 @@ import RoleGuard from '@/components/RoleGuard';
 import { fetchMyScanLogs } from '@/api/scanLogs';
 import ErrorMessage from '@/components/ErrorMessage';
 import Loading from '@/components/Loading';
+import { Suspense } from 'react';
 
-export default function ScanLogsListPage() {
+function ScanLogsList() {
   const params = useSearchParams();
   const courseId = params.get('course');
 
@@ -53,3 +54,12 @@ export default function ScanLogsListPage() {
     </Protected>
   );
 }
+
+export default function ScanLogsListPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ScanLogsList />
+    </Suspense>
+  );
+}
+
