@@ -1,33 +1,52 @@
-# POCUS Learning & Scan Log Mini-Platform  
-A full-stack web application for POCUS (Point-of-Care Ultrasound) training.  
-Learners can enroll in courses and log scans; faculty/admins can view metrics, learners, and logs.
+# POCUS Learning & Scan Log Mini-Platform
+A full-stack training platform for POCUS (Point-of-Care Ultrasound).
+Learners can enroll in courses and log scans. Faculty/Admins can manage courses and view analytics.
 
----
+## 🌐 Live Demo
+Frontend (Amplify):  
+https://master.d1q4nf9qlja1a8.amplifyapp.com/login
+
+👥 Test Accounts (Seeded Users)
+```
+Admin:
+  Email: admin@test.com
+  Password: password123
+
+Faculty:
+  Email: faculty@test.com
+  Password: password123
+
+Learner:
+  Email: learner@test.com
+  Password: password123
+```
+
 
 ## 🚀 Tech Stack
 
-### **Backend**
-- Node.js + Express  
-- TypeScript  
-- MongoDB (Mongoose)  
-- JWT Authentication  
-- Zod Validation  
-- Mongo Aggregations for Metrics  
+### Frontend
+- Next.js 16 (App Router)
+- React Query (TanStack)
+- TailwindCSS
+- Hosted on AWS Amplify
+- API calls routed through CloudFront HTTPS Proxy
 
-### **Frontend**
-- React (Vite + TypeScript)  
-- React Router  
-- React Query (API fetching)  
-- TailwindCSS (light styling)
+### Backend
+- Node.js + Express (TypeScript)
+- MongoDB Atlas (Mongoose)
+- JWT Authentication
+- Zod validation
+- Mongo aggregation pipelines (metrics)
+- Deployed on AWS Elastic Beanstalk
 
-### **Deployment**
-- MongoDB Atlas  
-- AWS S3 (Frontend hosting)  
-- AWS EC2 / Elastic Beanstalk / Lambda (Backend API)
+### Infrastructure
+- Amplify → Static Next.js application hosting
+- CloudFront → Reverse proxy for /api/*
+- Elastic Beanstalk → Node backend hosting
+- MongoDB Atlas → Managed database
+- GitHub Actions → Backend CI/CD deployment
 
----
-
-# 📁 Project Structure
+## 📁 Monorepo Structure
 
 ```
 pocus-platform/
@@ -42,229 +61,180 @@ pocus-platform/
       validation/
       utils/
     tests/
+    package.json
+
   frontend/
-    src/
-      pages/
-      components/
-      api/
-      routing/
+    app/
+    components/
+    api/
+    lib/
+    package.json
 ```
 
----
+## ⚙️ Backend Setup
 
-# ⚙️ Backend Setup
-
-## 1️⃣ **Install dependencies**
-
-```
+### 1️⃣ Install dependencies
+```bash
 cd backend
 npm install
 ```
 
----
-
-## 2️⃣ **Environment Variables**
-
-Create `.env` in `/backend`:
-
+### 2️⃣ Environment Variables
+Create backend/.env:
 ```
-PORT=4000
+PORT=5000
 MONGO_URI=mongodb://localhost:27017/pocus
 JWT_SECRET=super-secret-key
 ```
 
-For production:
-
-- Use MongoDB Atlas connection string  
-- Store JWT secret in AWS SSM or EB environment variables  
-
----
-
-## 3️⃣ **Run backend (with auto-reload)**
-
-### ✔ Recommended: `ts-node-dev` (already installed)
-
-`backend/package.json`:
-
-```json
-"scripts": {
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "seed": "ts-node-dev src/seed.ts",
-  "test": "jest --runInBand"
-}
+### Production (Elastic Beanstalk Environment Variables)
+```
+MONGO_URI=<Atlas connection string>
+JWT_SECRET=<secure generated token>
+CORS_ORIGIN=https://<AmplifyDomain>,https://<CloudFrontDomain>
 ```
 
-### Start in development mode:
-
-```
+### 3️⃣ Run backend in development mode
+```bash
 npm run dev
 ```
 
-This gives you:
-- automatic reload on file changes  
-- fast TypeScript execution  
-- no rebuild needed  
-
----
-
-# 🌱 Seeding the Database
-
-The backend ships with a sample seed script:
-
+Backend runs at:
 ```
+http://localhost:4000
+```
+
+## 🌱 Seed Database
+```bash
 npm run seed
 ```
 
-This creates:
+Creates sample users and sample FAST course.
 
-- 1 Admin  
-- 1 Faculty  
-- 1 Learner  
-- 1 FAST Exam course  
-
-Credentials are displayed after seeding.
-
----
-
-# 🧪 Run Tests
-
-Memory-backed Mongo tests via MongoMemoryServer:
-
-```
+## 🧪 Run Backend Tests
+```bash
 npm test
 ```
 
-Test suites include:
-- Auth service  
-- Enrollment service  
-- Scan Log service  
+## 🔌 Backend API Summary
 
----
+### Auth
+POST /api/auth/register  
+POST /api/auth/login  
 
-# 🔌 Backend API Endpoints (Summary)
+### Courses
+GET /api/courses  
+POST /api/courses (faculty/admin)  
+PATCH /api/courses/:id (faculty/admin)
 
-### **Auth**
-```
-POST /api/auth/register
-POST /api/auth/login
-```
+### Enrollment
+POST /api/enrollments  
+GET /api/enrollments/me  
 
-### **Courses**
-```
-GET    /api/courses
-POST   /api/courses          (faculty/admin)
-PATCH  /api/courses/:id      (faculty/admin)
-```
+### Scan Logs
+POST /api/scan-logs  
+GET /api/scan-logs/me  
+GET /api/scan-logs (faculty/admin)
 
-### **Enrollments**
-```
-POST /api/enrollments        (learner)
-GET  /api/enrollments/me     (learner)
-```
+### Metrics
+GET /api/metrics/summary
 
-### **Scan Logs**
-```
-POST /api/scan-logs          (learner)
-GET  /api/scan-logs/me       (learner)
-GET  /api/scan-logs          (faculty/admin)
-```
-
-### **Metrics**
-```
-GET /api/metrics/summary     (faculty/admin)
-```
-
----
-
-# 🧱 Backend Architecture Diagram
+## 🧱 System Architecture Diagram
 
 ```
-   +-------------+        +-------------------+
-   |   Frontend  | -----> |  API Gateway/EC2  |
-   |   React     |        |  Node + Express   |
-   +-------------+        +---------+---------+
-                                   |
-                                   v
-                        +----------------------+
-                        |   MongoDB (Atlas)    |
-                        | users/courses/scans  |
-                        +----------------------+
+          +------------------------+
+          |        USERS           |
+          +-----------+------------+
+                      |
+                      v
+     +----------------------------------------+
+     |        AWS Amplify (Next.js Frontend)  |
+     +--------------------+-------------------+
+                          |
+                          | HTTPS /api/*
+                          v
+          +------------------------------------------+
+          |     CloudFront Reverse Proxy (HTTPS)     |
+          +--------------------+---------------------+
+                               |
+                               v
+       +---------------------------------------------+
+       |  Elastic Beanstalk (Node.js Express API)    |
+       +-------------------+-------------------------+
+                           |
+                           v
+               +---------------------------+
+               |     MongoDB Atlas         |
+               +---------------------------+
 ```
 
----
+## 🎨 Frontend Setup
 
-# 🎨 Frontend Setup
-
-```
+```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Frontend will run at:
+Frontend runs at:
+```
+http://localhost:3000
+```
+
+## 🔧 Frontend Environment Variables
+Create frontend/.env.local:
 
 ```
-http://localhost:5173
+NEXT_PUBLIC_API_URL=https://<cloudfront-domain>/api
 ```
 
----
-
-# 📦 Frontend Build
-
-```
+## 📦 Frontend Production Build
+```bash
 npm run build
 ```
 
-Deploy `/dist` to:
+## 📘 Deployment Notes
 
-- AWS S3  
-- CloudFront (recommended)  
+### Frontend (Amplify)
+- Static Next.js deployment
+- API routed through CloudFront
 
----
+### Backend (Elastic Beanstalk)
+- CI/CD with GitHub Actions
+- Environment variables stored securely
 
-# 📘 Notes & Trade-offs
+### CloudFront
+- /api/* → EB backend
+- HTTPS enforced
+- Caching disabled for API routes
+
+### MongoDB
+- Atlas IP allowlist includes EB servers and local IP
+
+## 📙 Assumptions & Trade-offs
 
 ### Implemented:
 - Clean controller/service separation  
 - Zod validation per endpoint  
-- Role-based access control (RBAC)  
+- JWT auth + RBAC
 - Proper error handling middleware  
-- Mongo aggregation pipelines  
+- Mongodb Aggregation pipelines
 - Unit tests for core business logic  
-- Developer-friendly hot reload  
+- Automated backend deployment
 
-### Future Enhancements:
-- File uploads (scan images → S3)  
-- Full audit logging  
-- Role management UI  
-- CI/CD pipeline (GitHub Actions + EB deploy)  
-- Terraform or CDK infrastructure  
+### Trade-offs
+- Because of interview time constraints, the system uses simple role-based access, not a granular ACL mechanism.
+- Next.js frontend uses static export + client-side hydration, not full SSR, to ensure compatibility with Amplify Hosting.
+- The backend is a single-node Elastic Beanstalk instance (sufficient for demo; in production multi-AZ load balancing is required).
+- MongoDB Atlas networking uses IP allowlist for EB instance, not VPC peering (faster setup).
+- Minimal error-handling and form validation included; can be expanded in production
 
----
+### Future Enhancements
+- Image upload to S3
+- Audit logging
+- CI for frontend
+- Infrastructure as Code (CDK)
 
-# 👨‍💻 Developer Experience
-
-### Hot reload enabled using:
-
-```
-ts-node-dev --respawn --transpile-only
-```
-
-You modify any `.ts` file → backend restarts instantly.
-
-### File Watching Optimization
-
-If needed on Windows/macOS:
-
-```
-export TS_NODE_DEV_PRETTY=true
-export TS_NODE_DEV_LOG_ERROR=true
-```
-
----
-
-# 🙌 Author  
-Romeo — Full-Stack Engineer  
-POCUS Learning Platform (Mini-Project)
+## 👨‍💻 Author
+**Romeo Enso**  
+Full-Stack Engineer — POCUS Learning Platform
