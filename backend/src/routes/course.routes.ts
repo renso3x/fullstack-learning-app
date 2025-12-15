@@ -7,5 +7,5 @@ import { validate } from '../middleware/validate';
 export const courseRouter = Router();
 
 courseRouter.get('/', courseController.getActive);
-courseRouter.post('/', auth('faculty', 'admin'), validate(createCourseSchema), courseController.create);
-courseRouter.patch('/:id', auth('faculty', 'admin'), validate(updateCourseSchema), courseController.update);
+courseRouter.post('/', auth('admin'), validate(createCourseSchema), courseController.create);
+courseRouter.patch('/:id', auth('admin'), validate(updateCourseSchema), courseController.update);

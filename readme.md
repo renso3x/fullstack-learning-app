@@ -2,6 +2,36 @@
 A full-stack training platform for POCUS (Point-of-Care Ultrasound).
 Learners can enroll in courses and log scans. Faculty/Admins can manage courses and view analytics.
 
+## 🧱 System Architecture Diagram
+
+```
+          +------------------------+
+          |        USERS           |
+          +-----------+------------+
+                      |
+                      v
+     +----------------------------------------+
+     |        AWS Amplify (Next.js Frontend)  |
+     +--------------------+-------------------+
+                          |
+                          | HTTPS /api/*
+                          v
+          +------------------------------------------+
+          |     CloudFront Reverse Proxy (HTTPS)     |
+          +--------------------+---------------------+
+                               |
+                               v
+       +---------------------------------------------+
+       |  Elastic Beanstalk (Node.js Express API)    |
+       +-------------------+-------------------------+
+                           |
+                           v
+               +---------------------------+
+               |     MongoDB Atlas         |
+               +---------------------------+
+```
+
+
 ## 🌐 Live Demo
 Frontend (Amplify):  
 https://master.d1q4nf9qlja1a8.amplifyapp.com/login
@@ -138,35 +168,6 @@ GET /api/scan-logs (faculty/admin)
 
 ### Metrics
 GET /api/metrics/summary
-
-## 🧱 System Architecture Diagram
-
-```
-          +------------------------+
-          |        USERS           |
-          +-----------+------------+
-                      |
-                      v
-     +----------------------------------------+
-     |        AWS Amplify (Next.js Frontend)  |
-     +--------------------+-------------------+
-                          |
-                          | HTTPS /api/*
-                          v
-          +------------------------------------------+
-          |     CloudFront Reverse Proxy (HTTPS)     |
-          +--------------------+---------------------+
-                               |
-                               v
-       +---------------------------------------------+
-       |  Elastic Beanstalk (Node.js Express API)    |
-       +-------------------+-------------------------+
-                           |
-                           v
-               +---------------------------+
-               |     MongoDB Atlas         |
-               +---------------------------+
-```
 
 ## 🎨 Frontend Setup
 

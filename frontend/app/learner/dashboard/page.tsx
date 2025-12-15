@@ -55,7 +55,7 @@ export default function LearnerDashboard() {
             {loadingCourses && <p>Loading courses...</p>}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {courses?.map((course: any) => (
+              {courses?.filter(course => course.status === 'active').map((course: any) => (
                 <div
                   key={course._id}
                   className="bg-white p-4 shadow rounded-lg"
