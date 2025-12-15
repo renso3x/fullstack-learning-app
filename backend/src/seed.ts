@@ -1,48 +1,80 @@
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 import { connectDb } from './config/db';
 import { UserModel } from './models/user.model';
 import { CourseModel } from './models/course.model';
-import bcrypt from 'bcryptjs';
 
 async function seed() {
-  await connectDb();
+  try {
+    await connectDb();
 
-  await UserModel.deleteMany({});
-  await CourseModel.deleteMany({});
+    // 🔒 Safety check — never seed prod by accident
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('❌ Seeding is disabled in production');
+    }
 
-  const passwordHash = await bcrypt.hash('password123', 10);
+    console.log('🧹 Dropping database...');
+    await mongoose.connection.dropDatabase();
 
-  const admin = await UserModel.create({
-    name: 'Admin User',
-    email: 'admin@example.com',
-    passwordHash,
-    role: 'admin',
-  });
+    const passwordHash = await bcrypt.hash('password123', 10);
 
-  const faculty = await UserModel.create({
-    name: 'Faculty User',
-    email: 'faculty@example.com',
-    passwordHash,
-    role: 'faculty',
-  });
+    const admin = await UserModel.create({
+      name: 'Admin User',
+      email: 'admin@test.com',
+      passwordHash,
+      role: 'admin',
+    });
 
-  const learner = await UserModel.create({
-    name: 'Learner User',
-    email: 'learner@example.com',
-    passwordHash,
-    role: 'learner',
-  });
+    const faculty = await UserModel.create({
+      name: 'Faculty User',
+      email: 'faculty@test.com',
+      passwordHash,
+      role: 'faculty',
+    });
 
-  const course1 = await CourseModel.create({
-    title: 'FAST Exam',
-    description: 'Focused abdominal ultrasound',
-    modality: 'Abdominal',
-    status: 'active',
-  });
+    const learner = await UserModel.create({
+      name: 'Learner User',
+      email: 'learner@test.com',
+      passwordHash,
+      role: 'learner',
+    });
 
-  console.log('Seeded:');
-  console.log({ admin, faculty, learner, course1 });
+    const courses = [
+      {
+        title: 'FAST Exam',
+        description: 'Focused Assessment with Sonography in Trauma',
+        modality: 'POCUS',
+        status: 'active',
+      },
+      {
+        title: 'Abdominal POCUS',
+        description: 'Core abdominal ultrasound scanning',
+        modality: 'POCUS',
+        status: 'active',
+      },
+      {
+        title: 'Cardiac POCUS',
+        description: 'Basic cardiac ultrasound views',
+        modality: 'POCUS',
+        status: 'active',
+      },
+    ];
 
-  process.exit(0);
+    await CourseModel.insertMany(courses);
+
+    console.log('✅ Database seeded successfully');
+    console.log({
+      admin: admin.email,
+      faculty: faculty.email,
+      learner: learner.email,
+      courses: courses.map((c) => c.title),
+    });
+  } catch (error) {
+    console.error('❌ Seed failed:', error);
+  } finally {
+    await mongoose.disconnect();
+    process.exit(0);
+  }
 }
 
 seed();
