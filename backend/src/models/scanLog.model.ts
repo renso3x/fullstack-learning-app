@@ -1,9 +1,8 @@
-
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface ScanLogDocument extends Document {
-  userId: Types.ObjectId | string;
-  courseId: Types.ObjectId | string;
+  userId: Types.ObjectId 
+  courseId: Types.ObjectId 
   title: string;
   indication: string;
   dateOfScan: Date;
@@ -24,11 +23,25 @@ const ScanLogSchema = new Schema<ScanLogDocument>(
     notes: String,
     imageUrl: String,
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 ScanLogSchema.index({ userId: 1 });
 ScanLogSchema.index({ courseId: 1 });
 ScanLogSchema.index({ dateOfScan: 1 });
+
+ScanLogSchema.virtual('user', {
+  ref: 'User',
+  localField: 'userId',
+  foreignField: '_id',
+  justOne: true,
+});
+
+ScanLogSchema.virtual('course', {
+  ref: 'Course',
+  localField: 'courseId',
+  foreignField: '_id',
+  justOne: true,
+});
 
 export const ScanLogModel = model<ScanLogDocument>('ScanLog', ScanLogSchema);

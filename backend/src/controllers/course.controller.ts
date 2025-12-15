@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { courseService } from '../services/course.service';
 
 export const courseController = {
-  async getActive(_req: Request, res: Response, next: NextFunction) {
+  async getActive(req: Request, res: Response, next: NextFunction) {
     try {
-      const courses = await courseService.getActiveCourses();
+      const courses = await courseService.getCourses(req.query);
       res.json(courses);
     } catch (err) {
       next(err);

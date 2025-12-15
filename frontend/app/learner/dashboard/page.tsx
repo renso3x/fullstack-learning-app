@@ -63,13 +63,19 @@ export default function LearnerDashboard() {
                   <h3 className="text-lg font-semibold">{course.title}</h3>
                   <p className="text-sm text-gray-500">{course.modality}</p>
 
-                  <button
-                    className="btn btn-primary mt-3"
-                    disabled={mutation.isPending}
-                    onClick={() => mutation.mutate(course._id)}
-                  >
-                    Enroll
-                  </button>
+                  {myEnrollments?.some(
+                    (en: any) => en.courseId?._id === course._id
+                  ) ? (
+                    <>Enrolled</>
+                  ) : (
+                    <button
+                      className="btn btn-primary mt-3"
+                      disabled={mutation.isPending}
+                      onClick={() => mutation.mutate(course._id)}
+                    >
+                      Enroll
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -85,6 +91,12 @@ export default function LearnerDashboard() {
                 <li
                   key={en._id}
                   className="bg-white p-3 rounded shadow flex justify-between"
+                  style={{
+                    ...(en.courseId?.status === 'inactive' && {
+                      opacity: 0.6,
+                      pointerEvents: 'none',
+                    }),
+                  }}
                 >
                   <span>{en.courseId?.title}</span>
 

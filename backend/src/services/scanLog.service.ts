@@ -31,12 +31,15 @@ export const scanLogService = {
       if (query.to) filter.dateOfScan.$lte = new Date(query.to);
     }
 
-    return ScanLogModel.find(filter).sort({ dateOfScan: -1 });
+    return ScanLogModel.find(filter)
+      .sort({ dateOfScan: -1 })
+      .populate({ path: 'userId', select: 'name email' })
+      .populate({ path: 'courseId', select: 'title' })
   },
 
   async listScanLogs(filter: any) {
     return await ScanLogModel.find(filter)
-      .populate('userId', 'name email')
-      .populate('courseId', 'title');
+      .populate({ path: 'userId', select: 'name email' })
+      .populate({ path: 'courseId', select: 'title' });
   }
 };

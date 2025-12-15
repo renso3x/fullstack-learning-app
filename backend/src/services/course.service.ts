@@ -5,8 +5,12 @@ class NotFoundError extends Error {
 }
 
 export const courseService = {
-  async getActiveCourses() {
-    return CourseModel.find({ status: 'active' });
+  async getCourses(query?: any) {
+    if (query.status) {
+      return CourseModel.find({ status: query.status });
+    }
+
+    return CourseModel.find();
   },
 
   async createCourse(data: any) {
