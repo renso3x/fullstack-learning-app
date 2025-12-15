@@ -4,18 +4,24 @@ import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import Protected from '@/components/Protected';
 import RoleGuard from '@/components/RoleGuard';
-import { fetchMyScanLogs } from '@/api/scanLogs';
+import { fetchFilteredScanLogs } from '@/api/scanLogs';
 import ErrorMessage from '@/components/ErrorMessage';
 import Loading from '@/components/Loading';
 import { Suspense } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 function ScanLogsList() {
+  const { user } = useAuth();
   const params = useSearchParams();
   const courseId = params.get('course');
 
-  const { data: logs, isLoading, error } = useQuery({
+  const {
+    data: logs,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['my-scan-logs', courseId],
-    queryFn: () => fetchMyScanLogs(courseId || undefined),
+    queryFn: () => fetchFilteredScanLogs({ userId: user?.id, courseId: courseId || undefined }),
   });
 
 

@@ -13,4 +13,4 @@ scanLogRouter.post(
   scanLogController.create
 );
 scanLogRouter.get('/me', auth('learner'), scanLogController.getMine);
-scanLogRouter.get('/', auth('faculty', 'admin'), scanLogController.getFiltered);
+scanLogRouter.get('/', auth('faculty', 'admin', 'learner'), scanLogController.getFiltered);

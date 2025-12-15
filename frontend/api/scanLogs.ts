@@ -12,3 +12,12 @@ export async function createScanLog(payload: any) {
   const res = await api.post('/scan-logs', payload);
   return res.data;
 }
+
+export async function fetchFilteredScanLogs(filters: {
+  userId?: string;
+  courseId?: string;}) {
+  const res = await api.get('/scan-logs', {
+    params: filters,
+  });
+  return res.data;
+}
